@@ -1,55 +1,36 @@
-var gulp = require('gulp'),
-    babel = require('gulp-babel'),
-    uglify = require('gulp-uglify'),
-    concat = require('gulp-concat'),
-    sourcemaps = require('gulp-sourcemaps');
+var gulp = require('gulp');
+var sourcemaps = require('gulp-sourcemaps');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
+var browserify = require('browserify');
+var watchify = require('watchify');
+var babel = require('babelify');
+var uglify = require('gulp-uglify');
 
 gulp.task('build:base', function () {
-  gulp.src([
-      './src/angular-mdl.base.js',
-      './src/angular-mdl.base/*.js'
-    ])
-    .pipe(sourcemaps.init())
-    .pipe(babel())
-    .pipe(concat('angular-mdl.base.js'))
-    .pipe(gulp.dest('./dist/'));
+  var bundler = browserify('./src/angular-mdl.base.js', { debug: true }).transform(babel);
 
-  gulp.src([
-      './src/angular-mdl.base.js',
-      './src/angular-mdl.base/*.js'
-    ])
-    .pipe(babel())
+  bundler.bundle()
+    .on('error', function(err) { console.error(err); this.emit('end'); })
+    .pipe(source('angular-mdl.base.min.js'))
+    .pipe(buffer())
     .pipe(uglify())
-    .pipe(concat('angular-mdl.base.min.js'))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('./dist/'));
-})
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest('./dist'));
+});
 
 gulp.task('build', ['build:base'], function () {
+  var bundler = browserify('./src/angular-mdl.js', { debug: true }).transform(babel);
 
-  gulp.src([
-      './src/angular-mdl.base.js',
-      './src/angular-mdl.base/*.js',
-      './src/angular-mdl.js',
-      './src/angular-mdl/*.js'
-    ])
-    .pipe(sourcemaps.init())
-    .pipe(babel())
-    .pipe(concat('angular-mdl.js'))
-    .pipe(gulp.dest('./dist/'));
-
-  gulp.src([
-      './src/angular-mdl.base.js',
-      './src/angular-mdl.base/*.js',
-      './src/angular-mdl.js',
-      './src/angular-mdl/*.js'
-    ])
-    .pipe(babel())
+  bundler.bundle()
+    .on('error', function(err) { console.error(err); this.emit('end'); })
+    .pipe(source('angular-mdl.min.js'))
+    .pipe(buffer())
     .pipe(uglify())
-    .pipe(concat('angular-mdl.min.js'))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('./dist/'));
-
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('default', ['build']);
