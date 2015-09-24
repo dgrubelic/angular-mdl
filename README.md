@@ -1,3 +1,2 @@
-# Angular-mdl
-
-## Material design lite directives for Angular.js
+# angular-mdl
+Google's Material Design Lite Angular.js directives
